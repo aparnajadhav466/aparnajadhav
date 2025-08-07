@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Simple Ludo Game</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background-color: #f0f0f0;
+    }
+
+    #board {
+      width: 400px;
+      height: 400px;
+      margin: 20px auto;
+      display: grid;
+      grid-template-columns: repeat(15, 1fr);
+      grid-template-rows: repeat(15, 1fr);
+      border: 2px solid #000;
+    }
+
+    .cell {
+      width: 100%;
+      height: 100%;
+      border: 0.5px solid #ccc;
+      box-sizing: border-box;
+    }
+
+    .home {
+      background-color: lightgray;
+    }
+
+    .green { background-color: lightgreen; }
+    .red { background-color: lightcoral; }
+    .blue { background-color: lightblue; }
+    .yellow { background-color: lightyellow; }
+
+    .token {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    #dice {
+      margin-top: 20px;
+      font-size: 24px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 18px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+
+    #player-turn {
+      font-size: 20px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Simple Ludo Game</h1>
+  <div id="board"></div>
+
+  <div id="dice">Roll: 🎲</div>
+  <button onclick="rollDice()">Roll Dice</button>
+  <div id="player-turn">Player Turn: <span id="current-player">Green</span></div>
+
+  <script>
+    const board = document.getElementById('board');
+    const diceDisplay = document.getElementById('dice');
+    const currentPlayerSpan = document.getElementById('current-player');
+
+    const boardSize = 15;
+    const totalCells = boardSize * boardSize;
+    const tokens = {
+      green: { position: -1, color: 'green' },
+      red: { position: -1, color: 'red' },
+      blue: { position: -1, color: 'blue' },
+      yellow: { position: -1, color: 'yellow' }
+    };
+
+    const players = ['green', 'red', 'blue', 'yellow'];
+    let currentPlayerIndex = 0;
+    let diceValue = 0;
+
+    // Create board
+    for (let i = 0; i < totalCells; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      board.appendChild(cell);
+    }
+
+    function rollDice() {
+      diceValue = Math.floor(Math.random() * 6) + 1;
+      diceDisplay.innerText = `Roll: 🎲 ${diceValue}`;
+      moveToken();
+    }
+
+    function moveToken() {
+      const player = players[currentPlayerIndex];
+      let token = tokens[player];
+
+      if (token.position === -1 && diceValue === 6) {
+        token.position = 0;
+      } else if (token.position >= 0) {
+        token.position += diceValue;
+        if (token.position > 50) token.position = 50; // limit
+      }
+
+      updateBoard();
+
+      // Next player's turn unless dice is 6
+      if (diceValue !== 6) {
+        currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+      }
+      currentPlayerSpan.innerText = players[currentPlayerIndex].charAt(0).toUpperCase() + players[currentPlayerIndex].slice(1);
+    }
+
+    function updateBoard() {
+      // Clear all
+      const cells = document.querySelectorAll('.cell');
+      cells.forEach(cell => {
+        cell.innerHTML = '';
+        cell.classList.remove('green', 'red', 'blue', 'yellow');
+      });
+
+      // Place tokens
+      for (const player in tokens) {
+        let token = tokens[player];
+        if (token.position >= 0 && token.position < totalCells) {
+          const cell = cells[token.position];
+          cell.classList.add(player);
+          cell.innerHTML = `<div class="token">${player[0].toUpperCase()}</div>`;
+        }
+      }
+    }
+
+    updateBoard();
+  </script>
+</body>
+</html>
